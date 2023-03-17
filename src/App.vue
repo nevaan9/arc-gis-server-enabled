@@ -48,6 +48,7 @@
         clientId: 'Txk8DYydVxfsuieL',
         clientSecret: '0f7694366da64580ae453e3497150c8a',
         gisOrigin: 'https://www.arcgis.com/sharing/rest/',
+        codeValidateEndpoint: 'https://dfe6ud80mf.execute-api.us-east-1.amazonaws.com/api/validate',
         redirectUrl,
         accessToken: null,
         username: null,
@@ -68,7 +69,7 @@
         }
         this.loading = true
         try {
-          const { data: tokenData } = await axios({ method: 'post', url: 'http://127.0.0.1:3000/validate', data: postData })
+          const { data: tokenData } = await axios({ method: 'post', url: this.codeValidateEndpoint, data: postData })
           if (tokenData.error) {
             this.error = tokenData.error
           } else if (tokenData?.access_token) {
