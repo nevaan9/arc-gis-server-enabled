@@ -78,6 +78,8 @@
               this.error = gisData.error
             } else {
               this.username = gisData?.user?.username
+              // Remove query params
+              window.history.replaceState(null, null, window.location.pathname)
             }
           }
         } catch (e) {
