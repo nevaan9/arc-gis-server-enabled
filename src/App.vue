@@ -5,16 +5,35 @@
     </header>
 
     <main>
-      <input v-model="argGisEndpointHost" type="text" id="name" name="name" size="100">
-      <p>Hostname: {{ argGisEndpointHost }}</p>
-      <div style="margin-top: 20px;"></div>
-      <input v-model="appId" type="text" id="name" name="name" size="100">
-      <p>appId: {{ appId }}</p>
-      <div style="margin-top: 20px;"></div>
-      <input v-model="appSecret" type="text" id="name" name="name" size="100">
-      <p>appSecret: {{ appSecret }}</p>
-      <div style="margin-top: 20px;"></div>
-      <a :href="authEndpoint">Login</a>
+      <div
+        v-if="loading"
+      >
+        Getting auth token and attempting to login...
+      </div>
+      <div
+        v-else-if="error"
+      >
+        {{ error }}
+      </div>
+      <div
+        v-else-if="!username"
+      >
+        <input v-model="gisOrigin" type="text" id="name" name="name" size="100">
+        <p>Hostname: {{ gisOrigin }}</p>
+        <div style="margin-top: 20px;"></div>
+        <input v-model="clientId" type="text" id="name" name="name" size="100">
+        <p>clientId: {{ clientId }}</p>
+        <div style="margin-top: 20px;"></div>
+        <input v-model="clientSecret" type="text" id="name" name="name" size="100">
+        <p>clientSecret: {{ clientSecret }}</p>
+        <div style="margin-top: 20px;"></div>
+        <a :href="authEndpoint">Login</a>
+      </div>
+      <div
+        v-else
+      >
+        Successfully logged in as: {{ username }}
+      </div>
     </main>
   </div>
 </template>
@@ -24,26 +43,53 @@
   export default {
     name: 'App',
     data () {
-      const redirectURL = window.encodeURIComponent(location.origin)
+      const redirectUrl = window.encodeURIComponent(location.origin)
       return {
-        appId: 'Txk8DYydVxfsuieL',
-        appSecret: 'Txk8DYydVxfsuieLTxk8DYydVxfsuieL',
-        argGisEndpointHost: 'https://www.arcgis.com/sharing/rest/',
-        redirectURL
+        clientId: 'Txk8DYydVxfsuieL',
+        clientSecret: '0f7694366da64580ae453e3497150c8a',
+        gisOrigin: 'https://www.arcgis.com/sharing/rest/',
+        redirectUrl,
+        accessToken: null,
+        username: null,
+        loading: false,
+        error: null
       }
     },
     async mounted () {
       const urlParams = new URLSearchParams(window.location.search)
       const code = urlParams.get('code');
       if (code) {
-        // const postData = { appId: '2', appSecret: 'abcd', id: '2', redirectURL: this.redirectURL, argGisEndpointHost: this.argGisEndpointHost }
-        // await axios({ method: 'post', url: 'https://64137572a68505ea733415f1.mockapi.io/api/creds', data: postData })
+        const postData = { 
+          clientId: this.clientId, 
+          clientSecret: this.clientSecret,
+          redirectUrl: this.redirectUrl, 
+          gisOrigin: this.gisOrigin,
+          code
+        }
+        this.loading = true
+        try {
+          const { data: tokenData } = await axios({ method: 'post', url: 'http://127.0.0.1:3000/validate', data: postData })
+          if (tokenData.error) {
+            this.error = tokenData.error
+          } else if (tokenData?.access_token) {
+            const { data: gisData } = await axios.get(`${this.gisOrigin}portals/self?f=pjson&token=${tokenData?.access_token}`)
+            if (gisData?.error) {
+              this.error = gisData.error
+            } else {
+              this.username = gisData?.user?.username
+            }
+          }
+        } catch (e) {
+          this.error = e
+        } finally {
+          this.loading = false
+        }
       }
 
     },
     computed: {
       authEndpoint () {
-        return `${this.argGisEndpointHost}oauth2/authorize/?client_id=${this.appId}&response_type=code&expiration=20160&redirect_uri=${this.redirectURL}`
+        return `${this.gisOrigin}oauth2/authorize/?client_id=${this.clientId}&response_type=code&expiration=20160&redirect_uri=${this.redirectUrl}`
       }
     }
   }
@@ -65,10 +111,6 @@ header {
     display: flex;
     place-items: center;
     padding-right: calc(var(--section-gap) / 2);
-  }
-
-  .logo {
-    margin: 0 2rem 0 0;
   }
 
   header .wrapper {
