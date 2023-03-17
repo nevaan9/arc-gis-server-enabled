@@ -18,13 +18,13 @@
       <div
         v-else-if="!username"
       >
-        <input v-model="gisOrigin" type="text" id="name" name="name" size="100">
+        <input v-model="gisOrigin" type="text" id="name" name="name" size="100" disabled>
         <p>Endpoint URL</p>
         <div style="margin-top: 20px;"></div>
-        <input v-model="clientId" type="text" id="name" name="name" size="100">
+        <input v-model="clientId" type="text" id="name" name="name" size="100" disabled>
         <p>Client ID</p>
         <div style="margin-top: 20px;"></div>
-        <input v-model="clientSecret" type="text" id="name" name="name" size="100">
+        <input v-model="clientSecret" type="text" id="name" name="name" size="100" disabled>
         <p>Client Secret</p>
         <div style="margin-top: 20px;"></div>
         <a :href="authEndpoint">Login</a>
