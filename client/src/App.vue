@@ -18,16 +18,17 @@
       <div
         v-else-if="!username"
       >
-        <input v-model="gisOrigin" type="text" id="name" name="name" size="100" disabled>
+        <input v-model="gisOrigin" type="text" id="name" name="name" size="100">
         <p>Endpoint URL</p>
         <div style="margin-top: 20px;"></div>
-        <input v-model="clientId" type="text" id="name" name="name" size="100" disabled>
+        <input v-model="clientId" type="text" id="name" name="name" size="100">
         <p>Client ID</p>
         <div style="margin-top: 20px;"></div>
-        <input v-model="clientSecret" type="text" id="name" name="name" size="100" disabled>
+        <input v-model="clientSecret" type="text" id="name" name="name" size="100">
         <p>Client Secret</p>
         <div style="margin-top: 20px;"></div>
-        <a :href="authEndpoint">Login</a>
+        <button @click="onAuthEndpoint">Login</button>
+        <div>{{ authEndpoint }}</div>
       </div>
       <div
         v-else
@@ -60,11 +61,9 @@
       const urlParams = new URLSearchParams(window.location.search)
       const code = urlParams.get('code');
       if (code) {
+        const gisAppData = JSON.parse(window.sessionStorage.getItem('gisAddData'))
         const postData = { 
-          clientId: this.clientId, 
-          clientSecret: this.clientSecret,
-          redirectUrl: this.redirectUrl, 
-          gisOrigin: this.gisOrigin,
+          ...gisAppData,
           code
         }
         this.loading = true
@@ -87,12 +86,26 @@
         } finally {
           this.loading = false
         }
+      } else {
+        window.sessionStorage.setItem('gisAddData', null)
       }
 
     },
     computed: {
       authEndpoint () {
         return `${this.gisOrigin}oauth2/authorize/?client_id=${this.clientId}&response_type=code&expiration=20160&redirect_uri=${this.redirectUrl}`
+      }
+    },
+    methods: {
+      onAuthEndpoint () {
+        const gisAppData = { 
+          clientId: this.clientId, 
+          clientSecret: this.clientSecret,
+          redirectUrl: this.redirectUrl, 
+          gisOrigin: this.gisOrigin,
+        }
+        window.sessionStorage.setItem('gisAddData', JSON.stringify(gisAppData))
+        location.assign(this.authEndpoint)
       }
     }
   }
