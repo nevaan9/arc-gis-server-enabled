@@ -27,6 +27,10 @@
         <input v-model="clientSecret" type="text" id="name" name="name" size="100">
         <p>Client Secret</p>
         <div style="margin-top: 20px;"></div>
+        <input type="radio" v-model="authType" value="client">Client
+        <input type="radio" v-model="authType" value="server">Server
+        <p>Auth Type</p>
+        <div style="margin-top: 20px;"></div>
         <button @click="onAuthEndpoint">Login</button>
         <div>{{ authEndpoint }}</div>
       </div>
@@ -50,6 +54,7 @@
         clientSecret: window.location.hostname === 'localhost' ? '0f7694366da64580ae453e3497150c8a' : '31ab93b2c2cf459c80f21e13d8cacfa0',
         gisOrigin: window.location.hostname === 'localhost' ? 'https://www.arcgis.com/sharing/rest/' : 'https://gisweb1.fortisbctest.com/fbcportal/sharing/rest/',
         codeValidateEndpoint: window.location.hostname === 'localhost' ? 'http://127.0.0.1:3000/validate' : 'https://dfe6ud80mf.execute-api.us-east-1.amazonaws.com/api/validate',
+        authType: 'client',
         redirectUrl,
         accessToken: null,
         username: null,
@@ -60,9 +65,19 @@
     async mounted () {
       const urlParams = new URLSearchParams(window.location.search)
       const code = urlParams.get('code');
+
+      const hash = window.location.hash.substring(1)
+      const hashResult = hash.split('&').reduce(function (res, item) {
+        var parts = item.split('=')
+        if (parts[0]) {
+          res[parts[0]] = parts[1]
+        }
+        return res
+      }, {})
+
       if (code) {
         const gisAppData = JSON.parse(window.sessionStorage.getItem('gisAddData'))
-        const postData = { 
+        const postData = {
           ...gisAppData,
           code
         }
@@ -86,6 +101,16 @@
         } finally {
           this.loading = false
         }
+      } else if (hashResult.access_token) {
+        const { gisOrigin } = JSON.parse(window.sessionStorage.getItem('gisAddData'))
+        const { data: gisData } = await axios.get(`${gisOrigin}portals/self?f=pjson&token=${hashResult.access_token}`)
+        if (gisData?.error) {
+          this.error = gisData.error
+        } else {
+          this.username = gisData?.user?.username
+          // Remove query params
+          window.history.replaceState(null, null, window.location.pathname)
+        }
       } else {
         window.sessionStorage.setItem('gisAddData', null)
       }
@@ -93,7 +118,10 @@
     },
     computed: {
       authEndpoint () {
-        return `${this.gisOrigin}oauth2/authorize/?client_id=${this.clientId}&response_type=code&expiration=20160&redirect_uri=${this.redirectUrl}`
+        if (this.authType === 'server') {
+          return `${this.gisOrigin}oauth2/authorize/?client_id=${this.clientId}&response_type=code&expiration=20160&redirect_uri=${this.redirectUrl}`
+        }
+        return `${this.gisOrigin}oauth2/authorize/?client_id=${this.clientId}&response_type=token&expiration=20160&redirect_uri=${this.redirectUrl}`
       }
     },
     methods: {
