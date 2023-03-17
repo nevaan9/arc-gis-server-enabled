@@ -3,7 +3,7 @@ import qs from 'qs'
 
 const publicAccessHeaders = {
     'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Methods': 'OPTIONS,GET',
+    'Access-Control-Allow-Methods': 'OPTIONS,GET,POST',
 }
 
 export async function lambdaHandler(event, context) {
@@ -33,14 +33,14 @@ export async function lambdaHandler(event, context) {
         data : data
     };
     console.log(`config >`, JSON.stringify(config, null, 2))
-    const { data } = await axios(config)
-    console.log(`response data >`, JSON.stringify(data, null, 2))
+    const { data: responseData } = await axios(config)
+    console.log(`response data >`, JSON.stringify(responseData, null, 2))
     return {
         statusCode: 200,
         headers: {
             ...publicAccessHeaders,
             'x-veoci-header' : 'arc-gis-token'
         },
-        body: JSON.stringify(data)
+        body: JSON.stringify(responseData)
     };
 };

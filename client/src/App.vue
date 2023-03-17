@@ -45,10 +45,10 @@
     data () {
       const redirectUrl = window.encodeURIComponent(location.origin)
       return {
-        clientId: 'PbmgNTzO0J3Cx4Bw',
-        clientSecret: '31ab93b2c2cf459c80f21e13d8cacfa0',
-        gisOrigin: 'https://gisweb1.fortisbctest.com/fbcportal/sharing/rest/',
-        codeValidateEndpoint: 'https://dfe6ud80mf.execute-api.us-east-1.amazonaws.com/api/validate',
+        clientId: window.location.hostname === 'localhost' ? 'Txk8DYydVxfsuieL' : 'PbmgNTzO0J3Cx4Bw',
+        clientSecret: window.location.hostname === 'localhost' ? '0f7694366da64580ae453e3497150c8a' : '31ab93b2c2cf459c80f21e13d8cacfa0',
+        gisOrigin: window.location.hostname === 'localhost' ? 'https://www.arcgis.com/sharing/rest/' : 'https://gisweb1.fortisbctest.com/fbcportal/sharing/rest/',
+        codeValidateEndpoint: window.location.hostname === 'localhost' ? 'http://127.0.0.1:3000/validate' : 'https://dfe6ud80mf.execute-api.us-east-1.amazonaws.com/api/validate',
         redirectUrl,
         accessToken: null,
         username: null,

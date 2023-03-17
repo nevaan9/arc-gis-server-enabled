@@ -14,7 +14,7 @@ Resources:
     Properties:
       StageName: api
       Cors:
-        AllowMethods: "'OPTIONS,POST'"
+        AllowMethods: "'OPTIONS,GET,POST'"
         AllowHeaders: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
         AllowOrigin: "'*'"
   ValidateArcGisCodeFunctionRole:
