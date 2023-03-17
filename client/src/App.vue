@@ -45,9 +45,9 @@
     data () {
       const redirectUrl = window.encodeURIComponent(location.origin)
       return {
-        clientId: 'Txk8DYydVxfsuieL',
-        clientSecret: '0f7694366da64580ae453e3497150c8a',
-        gisOrigin: 'https://www.arcgis.com/sharing/rest/',
+        clientId: 'PbmgNTzO0J3Cx4Bw',
+        clientSecret: '31ab93b2c2cf459c80f21e13d8cacfa0',
+        gisOrigin: 'https://gisweb1.fortisbctest.com/fbcportal/sharing/rest/',
         codeValidateEndpoint: 'https://dfe6ud80mf.execute-api.us-east-1.amazonaws.com/api/validate',
         redirectUrl,
         accessToken: null,
