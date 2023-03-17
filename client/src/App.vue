@@ -19,13 +19,13 @@
         v-else-if="!username"
       >
         <input v-model="gisOrigin" type="text" id="name" name="name" size="100">
-        <p>Hostname: {{ gisOrigin }}</p>
+        <p>Endpoint URL</p>
         <div style="margin-top: 20px;"></div>
         <input v-model="clientId" type="text" id="name" name="name" size="100">
-        <p>clientId: {{ clientId }}</p>
+        <p>Client ID</p>
         <div style="margin-top: 20px;"></div>
         <input v-model="clientSecret" type="text" id="name" name="name" size="100">
-        <p>clientSecret: {{ clientSecret }}</p>
+        <p>Client Secret</p>
         <div style="margin-top: 20px;"></div>
         <a :href="authEndpoint">Login</a>
       </div>
