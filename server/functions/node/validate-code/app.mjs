@@ -1,4 +1,5 @@
 import axios from 'axios'
+import qs from 'qs'
 
 const publicAccessHeaders = {
     'Access-Control-Allow-Origin': '*',
@@ -14,10 +15,26 @@ export async function lambdaHandler(event, context) {
     const clientSecret = event.body.clientSecret
     const code = event.body.code
     const redirectUrl = event.body.redirectUrl
-    const gisOrigin = 'https://www.arcgis.com/sharing/rest/'
+    const gisOrigin = event.body.gisOrigin
     const gisTokenEndpoint = `${gisOrigin}oauth2/token/?code=${code}&client_id=${clientId}&client_secret=${clientSecret}&redirect_uri=${redirectUrl}&grant_type=authorization_code`
-    console.log('gisTokenEndpoint', gisTokenEndpoint)
-    const { data } = await axios.get(gisTokenEndpoint)
+    var data = qs.stringify({
+        'code': code,
+        'client_id': clientId,
+        'client_secret': clientSecret,
+        'redirect_uri': redirectUrl,
+        'grant_type': 'authorization_code' 
+    });
+    var config = {
+        method: 'post',
+        url: gisTokenEndpoint,
+        headers: { 
+            'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        data : data
+    };
+    console.log(`config >`, JSON.stringify(config, null, 2))
+    const { data } = await axios(config)
+    console.log(`response data >`, JSON.stringify(data, null, 2))
     return {
         statusCode: 200,
         headers: {
