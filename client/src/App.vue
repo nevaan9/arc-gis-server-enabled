@@ -16,17 +16,14 @@
         {{ error }}
       </div>
       <div v-else-if="!username">
-        <input v-model="gisOrigin" type="text" size="100" />
-        <p>Endpoint URL</p>
+        <input v-model="portalUrl" type="text" size="100" />
+        <p>Portal URL</p>
         <div style="margin-top: 20px"></div>
         <input v-model="clientId" type="text" size="100" />
         <p>Client ID</p>
         <div style="margin-top: 20px"></div>
         <input v-model="clientSecret" type="text" size="100" />
         <p>Client Secret</p>
-        <div style="margin-top: 20px"></div>
-        <input v-model="portalUrl" type="text" size="100" />
-        <p>Portal URL</p>
         <div style="margin-top: 20px"></div>
         <input type="radio" v-model="authType" value="sdk" />Esri SDK
         <input type="radio" v-model="authType" value="client" />Client
@@ -62,10 +59,6 @@ export default {
         window.location.hostname === "localhost"
           ? "0f7694366da64580ae453e3497150c8a"
           : "31ab93b2c2cf459c80f21e13d8cacfa0",
-      gisOrigin:
-        window.location.hostname === "localhost"
-          ? "https://www.arcgis.com/sharing/rest/"
-          : "https://gisweb1.fortisbctest.com/fbcportal/sharing/rest/",
       codeValidateEndpoint:
         window.location.hostname === "localhost"
           ? "http://127.0.0.1:3000/validate"
@@ -114,7 +107,7 @@ export default {
           this.error = tokenData.error;
         } else if (tokenData?.access_token) {
           const { data: gisData } = await axios.get(
-            `${this.gisOrigin}portals/self?f=pjson&token=${tokenData?.access_token}`
+            `${this.portalUrl}sharing/rest/portals/self?f=pjson&token=${tokenData?.access_token}`
           );
           if (gisData?.error) {
             this.error = gisData.error;
@@ -130,11 +123,11 @@ export default {
         this.loading = false;
       }
     } else if (hashResult.access_token) {
-      const { gisOrigin } = JSON.parse(
+      const { portalUrl } = JSON.parse(
         window.sessionStorage.getItem("gisAddData")
       );
       const { data: gisData } = await axios.get(
-        `${gisOrigin}portals/self?f=pjson&token=${hashResult.access_token}`
+        `${portalUrl}sharing/rest/portals/self?f=pjson&token=${hashResult.access_token}`
       );
       if (gisData?.error) {
         this.error = gisData.error;
@@ -171,9 +164,9 @@ export default {
   computed: {
     authEndpoint() {
       if (this.authType === "server") {
-        return `${this.gisOrigin}oauth2/authorize/?client_id=${this.clientId}&response_type=code&expiration=20160&redirect_uri=${this.redirectUrl}`;
+        return `${this.portalUrl}sharing/rest/oauth2/authorize/?client_id=${this.clientId}&response_type=code&expiration=20160&redirect_uri=${this.redirectUrl}`;
       } else if (this.authType === "client") {
-        return `${this.gisOrigin}oauth2/authorize/?client_id=${this.clientId}&response_type=token&expiration=20160&redirect_uri=${this.redirectUrl}`;
+        return `${this.portalUrl}sharing/rest/oauth2/authorize/?client_id=${this.clientId}&response_type=token&expiration=20160&redirect_uri=${this.redirectUrl}`;
       }
     },
   },
@@ -217,7 +210,6 @@ export default {
           clientId: this.clientId,
           clientSecret: this.clientSecret,
           redirectUrl: this.redirectUrl,
-          gisOrigin: this.gisOrigin,
           portalUrl: this.portalUrl,
         };
         window.sessionStorage.setItem("gisAddData", JSON.stringify(gisAppData));
@@ -226,10 +218,13 @@ export default {
         console.log("Generating info object...");
         const info = this.generateInfo();
         console.log("info", info);
-        window.sessionStorage.setItem(
-          "gisAddData",
-          JSON.stringify({ portalUrl: info.portalUrl })
-        );
+        const gisAppData = {
+          clientId: this.clientId,
+          clientSecret: this.clientSecret,
+          redirectUrl: this.redirectUrl,
+          portalUrl: info.portalUrl,
+        };
+        window.sessionStorage.setItem("gisAddData", JSON.stringify(gisAppData));
         console.log("[registerOAuthInfos]...");
         esriId.registerOAuthInfos([info]);
         try {

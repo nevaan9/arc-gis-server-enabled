@@ -15,22 +15,22 @@ export async function lambdaHandler(event, context) {
     const clientSecret = event.body.clientSecret
     const code = event.body.code
     const redirectUrl = event.body.redirectUrl
-    const gisOrigin = event.body.gisOrigin
-    const gisTokenEndpoint = `${gisOrigin}oauth2/token/?code=${code}&client_id=${clientId}&client_secret=${clientSecret}&redirect_uri=${redirectUrl}&grant_type=authorization_code`
+    const portalUrl = event.body.portalUrl
+    const gisTokenEndpoint = `${portalUrl}sharing/rest/oauth2/token/?code=${code}&client_id=${clientId}&client_secret=${clientSecret}&redirect_uri=${redirectUrl}&grant_type=authorization_code`
     var data = qs.stringify({
         'code': code,
         'client_id': clientId,
         'client_secret': clientSecret,
         'redirect_uri': redirectUrl,
-        'grant_type': 'authorization_code' 
+        'grant_type': 'authorization_code'
     });
     var config = {
         method: 'post',
         url: gisTokenEndpoint,
-        headers: { 
+        headers: {
             'Content-Type': 'application/x-www-form-urlencoded'
         },
-        data : data
+        data: data
     };
     console.log(`config >`, JSON.stringify(config, null, 2))
     const { data: responseData } = await axios(config)
@@ -38,8 +38,7 @@ export async function lambdaHandler(event, context) {
     return {
         statusCode: 200,
         headers: {
-            ...publicAccessHeaders,
-            'x-veoci-header' : 'arc-gis-token'
+            ...publicAccessHeaders
         },
         body: JSON.stringify(responseData)
     };
