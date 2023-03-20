@@ -87,11 +87,9 @@ export default {
       }
       return res;
     }, {});
-
+    const gisAppData = JSON.parse(window.sessionStorage.getItem("gisAddData"));
+    console.log('onMount gisAppData', gisAppData)
     if (code) {
-      const gisAppData = JSON.parse(
-        window.sessionStorage.getItem("gisAddData")
-      );
       const postData = {
         ...gisAppData,
         code,
@@ -123,11 +121,8 @@ export default {
         this.loading = false;
       }
     } else if (hashResult.access_token) {
-      const { portalUrl } = JSON.parse(
-        window.sessionStorage.getItem("gisAddData")
-      );
       const { data: gisData } = await axios.get(
-        `${portalUrl}sharing/rest/portals/self?f=pjson&token=${hashResult.access_token}`
+        `${gisAppData.portalUrl}sharing/rest/portals/self?f=pjson&token=${hashResult.access_token}`
       );
       if (gisData?.error) {
         this.error = gisData.error;
@@ -140,10 +135,7 @@ export default {
       // Check esri sdk stuff
       try {
         console.log("Generating info object...");
-        const gisAppData = JSON.parse(
-          window.sessionStorage.getItem("gisAddData")
-        );
-        const info = this.generateInfo(gisAppData?.portalUrl);
+        const info = this.generateInfo(gisAppData?.portalUrl, gisAppData?.clientId);
         console.log("info", info);
         console.log("[registerOAuthInfos]...");
         esriId.registerOAuthInfos([info]);
@@ -181,12 +173,11 @@ export default {
         console.error(error);
       }
     },
-    generateInfo(portalUrl = null) {
-      const pUrl = portalUrl || this.portalUrl || null;
-      const info = pUrl
+    generateInfo(portalUrl = null, appId = null) {
+      const info = portalUrl
         ? {
             // Swap this ID out with registered application ID
-            appId: this.clientId,
+            appId,
             // Uncomment the next line and update if using your own portal
             portalUrl: pUrl,
             // Uncomment the next line to prevent the user's signed in state from being shared with other apps on the same domain with the same authNamespace value.
@@ -196,7 +187,7 @@ export default {
           }
         : {
             // Swap this ID out with registered application ID
-            appId: this.clientId,
+            appId,
             // Uncomment the next line to prevent the user's signed in state from being shared with other apps on the same domain with the same authNamespace value.
             // authNamespace: "portal_oauth_inline",
             flowType: "auto", // default that uses two-step flow
@@ -216,7 +207,9 @@ export default {
         location.assign(this.authEndpoint);
       } else if (this.authType === "sdk") {
         console.log("Generating info object...");
-        const info = this.generateInfo();
+        const portalUrl = this.portalUrl || null
+        const appId = this.appId || null
+        const info = this.generateInfo(portalUrl, appId);
         console.log("info", info);
         const gisAppData = {
           clientId: this.clientId,
