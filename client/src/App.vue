@@ -208,7 +208,7 @@ export default {
       } else if (this.authType === "sdk") {
         console.log("Generating info object...");
         const portalUrl = this.portalUrl || null
-        const appId = this.appId || null
+        const appId = this.clientId || null
         const info = this.generateInfo(portalUrl, appId);
         console.log("info", info);
         const gisAppData = {
