@@ -37,11 +37,16 @@
         <p>Successfully logged in as: {{ username }}</p>
         <button @click="logout">Log out</button>
       </div>
+      <div>
+        <p>Load Esri Via CDN</p>
+        <button @click="loadEsri">Load</button>
+      </div>
     </main>
   </div>
 </template>
 
 <script>
+import { load, E as EsriObject } from './utils/load-esri'
 import axios from "axios";
 import esriId from "@arcgis/core/identity/IdentityManager";
 import OAuthInfo from "@arcgis/core/identity/OAuthInfo";
@@ -248,6 +253,10 @@ export default {
       esriId.destroyCredentials();
       window.location.reload();
     },
+    async loadEsri () {
+      await load()
+      console.log(EsriObject)
+    }
   },
 };
 </script>
